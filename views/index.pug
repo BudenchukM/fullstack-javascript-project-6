@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  nav.navbar.navbar-expand-lg.bg-body-tertiary.mb-4
+    .container-fluid
+      a.navbar-brand(href="/")= t('appName')
+      .collapse.navbar-collapse
+        ul.navbar-nav.ms-auto
+          li.nav-item
+            a.nav-link(href="#")= t('login')
+          li.nav-item
+            a.nav-link(href="#")= t('register')
+          li.nav-item
+            a.nav-link(href="#")= t('users')
+
+  .p-5.mb-4.bg-light.rounded-3
+    .container-fluid.py-5
+      h1.display-5.fw-bold= t('appName')
+      p.col-md-8.fs-4 URL Shortener service on Fastify
