@@ -11,8 +11,7 @@
     "url": "git+https://github.com/BudenchukM/fullstack-javascript-project-6.git"
   },
   "license": "ISC",
-  "author": "",
-  "type": "module",
+  "author": "BudenchukM",
   "main": "app.js",
   "scripts": {
     "start": "node server.js",
