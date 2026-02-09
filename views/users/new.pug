@@ -1,0 +1,18 @@
+extends ../layout.pug
+
+block content
+  h1 Sign Up
+  form(method="POST", action="/users")
+    div.mb-3
+      label(for="data_firstName") First Name
+      input.form-control#data_firstName(name="data[firstName]" required)
+    div.mb-3
+      label(for="data_lastName") Last Name
+      input.form-control#data_lastName(name="data[lastName]" required)
+    div.mb-3
+      label(for="data_email") Email
+      input.form-control#data_email(name="data[email]" type="email" required)
+    div.mb-3
+      label(for="data_password") Password
+      input.form-control#data_password(name="data[password]" type="password" required)
+    button.btn.btn-primary(type="submit") Sign Up
