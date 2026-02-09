@@ -1,23 +1,26 @@
+// routes/users.js
+const { Model } = require('objection');
 const User = require('../models/User');
 
+module.exports = async function (fastify) {
+  const { knex, models } = fastify.objection;
+  models.user = User;
 
-module.exports = async function (fastify, opts) {
-// список пользователей
-fastify.get('/', async (req, reply) => {
-const users = await User.query();
-return reply.view('users/index.pug', { users });
-});
+  // список всех пользователей
+  fastify.get('/users', async (req, reply) => {
+    const users = await User.query();
+    return reply.view('users/index.pug', { users, t: fastify.t });
+  });
 
+  // страница регистрации
+  fastify.get('/users/new', async (req, reply) => {
+    return reply.view('users/new.pug', { t: fastify.t });
+  });
 
-// регистрация
-fastify.get('/new', async (req, reply) => {
-return reply.view('users/new.pug');
-});
-
-
-fastify.post('/', async (req, reply) => {
-const data = req.body.data;
-await User.query().insert(data);
-return reply.redirect('/users');
-});
+  // создание пользователя
+  fastify.post('/users', async (req, reply) => {
+    const { firstName, lastName, email, password } = req.body.data;
+    await User.query().insert({ firstName, lastName, email, password });
+    return reply.redirect('/users');
+  });
 };

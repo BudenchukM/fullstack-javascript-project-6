@@ -1,13 +1,15 @@
+// app.js
 const path = require('path');
 const fastify = require('fastify')({ logger: true });
 const view = require('@fastify/view');
 const fastifyStatic = require('@fastify/static');
+const formbody = require('@fastify/formbody');
 const i18next = require('i18next');
 const Backend = require('i18next-fs-backend');
 const { Model } = require('objection');
 const Knex = require('knex');
 
-// ---------------- i18n ----------------
+// i18n
 i18next.use(Backend).init({
   lng: 'en',
   fallbackLng: 'en',
@@ -15,50 +17,45 @@ i18next.use(Backend).init({
     loadPath: path.join(__dirname, 'locales/{{lng}}.json'),
   },
 });
-
 fastify.decorate('t', i18next.t.bind(i18next));
 
-// ---------------- static ----------------
+// static (Bootstrap, CSS, JS)
 fastify.register(fastifyStatic, {
   root: path.join(__dirname, 'public'),
   prefix: '/public/',
 });
 
-// ---------------- pug ----------------
+// form parsing
+fastify.register(formbody);
+
+// pug
 fastify.register(view, {
   engine: { pug: require('pug') },
   root: path.join(__dirname, 'views'),
 });
 
-// делаем t доступным во ВСЕХ шаблонах
+// knex + objection (SQLite dev)
+const knex = Knex({
+  client: 'sqlite3',
+  connection: { filename: './dev.sqlite3' },
+  useNullAsDefault: true,
+});
+Model.knex(knex);
+fastify.decorate('objection', { knex, models: {} });
+
+// make t available in all views
 fastify.addHook('preHandler', (req, reply, done) => {
   reply.locals = { t: fastify.t };
   done();
 });
 
-// ---------------- database ----------------
-const knex = Knex({
-  client: 'sqlite3',
-  connection: {
-    filename: path.join(__dirname, 'dev.sqlite3'),
-  },
-  useNullAsDefault: true,
+// роут главной страницы
+fastify.get('/', async (req, reply) => {
+  return reply.view('index.pug');
 });
 
-Model.knex(knex);
-
-// подключаем модели
-const User = require('./models/User');
-
-fastify.decorate('objection', {
-  knex,
-  models: { User },
-});
-
-// ---------------- routes ----------------
-fastify.get('/', async (req, reply) => reply.view('index.pug'));
-
-// ВАЖНО — префикс
-fastify.register(require('./routes/users'), { prefix: '/users' });
+// подключение роутов (users и statuses)
+fastify.register(require('./routes/users'));
+fastify.register(require('./routes/statuses'));
 
 module.exports = fastify;
