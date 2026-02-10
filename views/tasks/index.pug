@@ -1,0 +1,26 @@
+extends ../layout.pug
+
+block content
+  h1= t('tasks')
+  a.btn.btn-primary(href='/tasks/new')= t('create_task')
+  table.table
+    thead
+      tr
+        th= t('name')
+        th= t('description')
+        th= t('status')
+        th= t('creator')
+        th= t('executor')
+        th= t('actions')
+    tbody
+      each task in tasks
+        tr
+          td= task.name
+          td= task.description
+          td= task.statusId
+          td= task.creatorId
+          td= task.executorId
+          td
+            a.btn.btn-sm.btn-secondary(href=`/tasks/${task.id}/edit`)= t('edit')
+            form(directive='post', action=`/tasks/${task.id}?_method=DELETE`, style='display:inline')
+              button.btn.btn-sm.btn-danger(type='submit')= t('delete')

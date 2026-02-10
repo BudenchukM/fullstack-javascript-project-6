@@ -4,6 +4,9 @@ const fastify = require('fastify')({ logger: true });
 const view = require('@fastify/view');
 const fastifyStatic = require('@fastify/static');
 const formbody = require('@fastify/formbody');
+const cookie = require('@fastify/cookie');
+const session = require('@fastify/session');
+const flash = require('@fastify/flash');
 const i18next = require('i18next');
 const Backend = require('i18next-fs-backend');
 const { Model } = require('objection');
@@ -19,22 +22,34 @@ i18next.use(Backend).init({
 });
 fastify.decorate('t', i18next.t.bind(i18next));
 
-// static (Bootstrap, CSS, JS)
+// Static files (Bootstrap CSS/JS)
 fastify.register(fastifyStatic, {
   root: path.join(__dirname, 'public'),
   prefix: '/public/',
 });
 
-// form parsing
+// Form parsing
 fastify.register(formbody);
 
-// pug
+// Cookies
+fastify.register(cookie);
+
+// Session
+fastify.register(session, {
+  secret: process.env.SESSION_SECRET || 'a_very_long_secret_key_at_least_32_chars',
+  cookie: { secure: false },
+});
+
+// Flash messages
+fastify.register(flash);
+
+// Pug
 fastify.register(view, {
   engine: { pug: require('pug') },
   root: path.join(__dirname, 'views'),
 });
 
-// knex + objection (SQLite dev)
+// Knex + Objection
 const knex = Knex({
   client: 'sqlite3',
   connection: { filename: './dev.sqlite3' },
@@ -43,19 +58,27 @@ const knex = Knex({
 Model.knex(knex);
 fastify.decorate('objection', { knex, models: {} });
 
-// make t available in all views
+// Make t, flash and currentUser available in all views
 fastify.addHook('preHandler', (req, reply, done) => {
-  reply.locals = { t: fastify.t };
+  reply.locals = {
+    t: fastify.t,
+    flash: req.flash ? req.flash() : {},
+    currentUser: req.session.userId || null,
+  };
   done();
 });
 
-// роут главной страницы
-fastify.get('/', async (req, reply) => {
-  return reply.view('index.pug');
-});
+// Главная страница
+fastify.get('/', async (req, reply) => reply.view('index.pug'));
 
-// подключение роутов (users и statuses)
+// Подключение роутов
 fastify.register(require('./routes/users'));
 fastify.register(require('./routes/statuses'));
+fastify.register(require('./routes/tasks'));
+
+// Обработка 404
+fastify.setNotFoundHandler((req, reply) => {
+  reply.status(404).view('404.pug');
+});
 
 module.exports = fastify;
