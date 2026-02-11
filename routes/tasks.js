@@ -14,6 +14,11 @@ module.exports = fastifyPlugin(async (fastify) => {
 
   // Форма создания
   fastify.get('/tasks/new', async (req, reply) => {
+    const labels = await Label.query();
+      reply.render('tasks/new', {
+        task,
+        labels,
+    });
     return reply.view('tasks/new.pug', { t: fastify.t });
   });
 
@@ -40,6 +45,11 @@ module.exports = fastifyPlugin(async (fastify) => {
   fastify.get('/tasks/:id/edit', async (req, reply) => {
     const task = await models.task.query().findById(req.params.id);
     if (!task) return reply.code(404).send('Not Found');
+    const labels = await Label.query();
+    reply.render('tasks/new', {
+      task,
+      labels,
+    });
     return reply.view('tasks/edit.pug', { task, t: fastify.t });
   });
 

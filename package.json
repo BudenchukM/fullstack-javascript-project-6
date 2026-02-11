@@ -15,6 +15,10 @@
   "main": "app.js",
   "scripts": {
     "start": "node server.js",
+    "dev": "nodemon server.js",
+    "migrate": "knex migrate:latest",
+    "rollback": "knex migrate:rollback",
+    "make-migration": "knex migrate:make",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -29,10 +33,12 @@
     "fastify": "^5.7.4",
     "i18next": "^25.8.4",
     "i18next-fs-backend": "^2.6.1",
-    "knex": "^3.1.0",
     "objection": "^3.1.5",
     "path": "^0.12.7",
     "pug": "^3.0.3",
     "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "knex": "^3.1.0"
   }
 }
