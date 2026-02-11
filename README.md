@@ -8,9 +8,15 @@ Task Manager – система управления задачами. Она п
 
 
 Проект на Fastify для Hexlet.
+
+
 Установка
+
 npm install
+
+
 Запуск
+
 npm start
 
 
