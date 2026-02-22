@@ -84,8 +84,7 @@ const registerPlugins = async (app) => {
   await app.register(fastifyPassport.secureSession());
   await app.decorate('fp', fastifyPassport);
 
-  const authenticateMiddleware = (...args) =>
-    fastifyPassport.authenticate('form', {
+  const authenticateMiddleware = (...args) => fastifyPassport.authenticate('form', {
       failureRedirect: '/',
       failureFlash: i18next.t('flash.authError'),
     })(...args);
@@ -109,7 +108,7 @@ const registerPlugins = async (app) => {
   });
 };
 
-export default fp(async function mainPlugin(app, opts) {
+export default fp(async (app, _opts) => {
   if (process.env.NODE_ENV !== 'test' && process.env.ROLLBAR_ACCESS_TOKEN) {
     const rollbar = new Rollbar({
       accessToken: process.env.ROLLBAR_ACCESS_TOKEN,
@@ -129,4 +128,3 @@ export default fp(async function mainPlugin(app, opts) {
 
   return app;
 });
-
