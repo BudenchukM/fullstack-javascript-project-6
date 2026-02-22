@@ -85,9 +85,9 @@ const registerPlugins = async (app) => {
   await app.decorate('fp', fastifyPassport);
 
   const authenticateMiddleware = (...args) => fastifyPassport.authenticate('form', {
-      failureRedirect: '/',
-      failureFlash: i18next.t('flash.authError'),
-    })(...args);
+    failureRedirect: '/',
+    failureFlash: i18next.t('flash.authError'),
+  })(...args);
 
   app.decorate('authenticate', authenticateMiddleware);
 
@@ -108,6 +108,7 @@ const registerPlugins = async (app) => {
   });
 };
 
+// eslint-disable-next-line no-unused-vars
 export default fp(async (app, _opts) => {
   if (process.env.NODE_ENV !== 'test' && process.env.ROLLBAR_ACCESS_TOKEN) {
     const rollbar = new Rollbar({
