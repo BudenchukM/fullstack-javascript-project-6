@@ -1,4 +1,3 @@
-// server/plugin.js
 import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'fs';
@@ -110,9 +109,7 @@ const registerPlugins = async (app) => {
   });
 };
 
-// ✅ Главный плагин для fastify-cli
-export default fp(async function mainPlugin(app) {
-  // Rollbar только вне тестов
+export default fp(async function mainPlugin(app, opts) {
   if (process.env.NODE_ENV !== 'test' && process.env.ROLLBAR_ACCESS_TOKEN) {
     const rollbar = new Rollbar({
       accessToken: process.env.ROLLBAR_ACCESS_TOKEN,
@@ -132,3 +129,4 @@ export default fp(async function mainPlugin(app) {
 
   return app;
 });
+

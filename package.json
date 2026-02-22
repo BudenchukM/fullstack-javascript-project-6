@@ -1,6 +1,7 @@
 {
   "name": "@hexlet/code",
   "version": "1.0.0",
+  "type": "module",
   "description": "Fullstack JavaScript Project 6",
   "homepage": "https://github.com/BudenchukM/fullstack-javascript-project-6#readme",
   "bugs": {
