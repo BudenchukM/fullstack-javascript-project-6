@@ -10,8 +10,7 @@ export const up = (knex) => (
     table.integer('status_id').notNullable();
     table.integer('creator_id').notNullable();
     table.integer('executor_id').nullable();
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamps(true, true);
 
     table.foreign('status_id')
       .references('statuses.id')

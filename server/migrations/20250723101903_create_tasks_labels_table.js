@@ -7,7 +7,7 @@ export const up = (knex) => (
     table.increments('id').primary();
     table.integer('task_id').unsigned().references('tasks.id').onDelete('CASCADE');
     table.integer('label_id').unsigned().references('labels.id').onDelete('RESTRICT');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamps(true, true);
   })
 );
 
