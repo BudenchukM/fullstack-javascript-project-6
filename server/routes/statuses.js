@@ -1,73 +1,79 @@
 import i18next from 'i18next';
 
 export default (app) => {
-  const objectionModels = app.objection.models;
-  const modelName = 'status';
-  const routePrefix = 'statuses';
+  const { status } = app.objection.models;
 
-  // GET /statuses — список
-  app.get(`/${routePrefix}`, { preValidation: app.authenticate }, async (request, reply) => {
-    const items = await objectionModels[modelName].query();
-    return reply.render(`${routePrefix}/index`, { [routePrefix]: items });
+  // INDEX
+  app.get('/statuses', { preValidation: app.authenticate }, async (request, reply) => {
+    const statuses = await status.query();
+    return reply.render('statuses/index', { statuses });
   });
 
-  // GET /statuses/new — форма создания
-  app.get(`/${routePrefix}/new`, { preValidation: app.authenticate }, (request, reply) => {
-    const item = new objectionModels[modelName]();
-    return reply.render(`${routePrefix}/new`, { [modelName]: item });
+  // NEW
+  app.get('/statuses/new', { preValidation: app.authenticate }, (request, reply) => {
+    const taskStatus = new status();
+    return reply.render('statuses/new', { taskStatus });
   });
 
-  // GET /statuses/:id/edit — форма редактирования
-  app.get(`/${routePrefix}/:id/edit`, { preValidation: app.authenticate }, async (request, reply) => {
+  // EDIT
+  app.get('/statuses/:id/edit', { preValidation: app.authenticate }, async (request, reply) => {
     const { id } = request.params;
-    const item = await objectionModels[modelName].query().findById(id);
-    return reply.render(`${routePrefix}/edit`, { [modelName]: item });
+    const taskStatus = await status.query().findById(id);
+    return reply.render('statuses/edit', { taskStatus });
   });
 
-  // POST /statuses — создание
-  app.post(`/${routePrefix}`, { preValidation: app.authenticate }, async (request, reply) => {
-    const item = new objectionModels[modelName]();
-    item.$set(request.body.data);
+  // CREATE
+  app.post('/statuses', { preValidation: app.authenticate }, async (request, reply) => {
+    const taskStatus = new status();
+    taskStatus.$set(request.body.data);
 
     try {
-      const validItem = await objectionModels[modelName].fromJson(request.body.data);
-      await objectionModels[modelName].query().insert(validItem);
+      const validData = status.fromJson(request.body.data);
+      await status.query().insert(validData);
+
       request.flash('info', i18next.t('flash.statuses.create.success'));
-      return reply.redirect(`/${routePrefix}`);
-    } catch ({ data }) {
-      request.flash('error', i18next.t('flash.statuses.create.error'));
-      return reply.render(`${routePrefix}/new`, { [modelName]: item, errors: data });
-    }
-  });
-
-  // PATCH /statuses/:id — обновление
-  app.patch(`/${routePrefix}/:id`, { preValidation: app.authenticate }, async (request, reply) => {
-    const { id } = request.params;
-    const item = await objectionModels[modelName].query().findById(id);
-
-    try {
-      await item.$query().patch(request.body.data);
-      request.flash('info', i18next.t('flash.statuses.update.success'));
-      return reply.redirect(`/${routePrefix}`);
-    } catch ({ data }) {
-      request.flash('error', i18next.t('flash.statuses.update.error'));
-      return reply.render(`${routePrefix}/edit`, { [modelName]: item, errors: data });
-    }
-  });
-
-  // DELETE /statuses/:id — удаление
-  app.delete(`/${routePrefix}/:id`, { preValidation: app.authenticate }, async (request, reply) => {
-    const { id } = request.params;
-    const item = await objectionModels[modelName].query().findById(id);
-
-    try {
-      await item.$query().delete();
-      request.flash('info', i18next.t('flash.statuses.delete.success'));
-      return reply.redirect(`/${routePrefix}`);
+      return reply.redirect('/statuses');
     } catch (error) {
-      console.error(error);
+      request.flash('error', i18next.t('flash.statuses.create.error'));
+      return reply.render('statuses/new', {
+        taskStatus,
+        errors: error.data,
+      });
+    }
+  });
+
+  // UPDATE
+  app.patch('/statuses/:id', { preValidation: app.authenticate }, async (request, reply) => {
+    const { id } = request.params;
+    const taskStatus = await status.query().findById(id);
+
+    try {
+      await taskStatus.$query().patch(request.body.data);
+
+      request.flash('info', i18next.t('flash.statuses.update.success'));
+      return reply.redirect('/statuses');
+    } catch (error) {
+      request.flash('error', i18next.t('flash.statuses.update.error'));
+      return reply.render('statuses/edit', {
+        taskStatus,
+        errors: error.data,
+      });
+    }
+  });
+
+  // DELETE
+  app.delete('/statuses/:id', { preValidation: app.authenticate }, async (request, reply) => {
+    const { id } = request.params;
+    const taskStatus = await status.query().findById(id);
+
+    try {
+      await taskStatus.$query().delete();
+
+      request.flash('info', i18next.t('flash.statuses.delete.success'));
+      return reply.redirect('/statuses');
+    } catch (error) {
       request.flash('error', i18next.t('flash.statuses.delete.error'));
-      return reply.redirect(`/${routePrefix}`);
+      return reply.redirect('/statuses');
     }
   });
 };

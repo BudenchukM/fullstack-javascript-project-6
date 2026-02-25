@@ -1,60 +1,78 @@
 import i18next from 'i18next';
 
 export default (app) => {
-  const objectionModels = app.objection.models;
-  const modelName = 'label';
-  const routePrefix = 'labels';
+  const { label } = app.objection.models;
 
-  app
-    .get(`/${routePrefix}`, { preValidation: app.authenticate }, async (request, reply) => {
-      const items = await objectionModels[modelName].query();
-      reply.render(`${routePrefix}/index`, { [routePrefix]: items });
-    })
-    .get(`/${routePrefix}/new`, { preValidation: app.authenticate }, (request, reply) => {
-      const item = new objectionModels[modelName]();
-      reply.render(`${routePrefix}/new`, { [modelName]: item });
-    })
-    .get(`/${routePrefix}/:id/edit`, { preValidation: app.authenticate }, async (request, reply) => {
-      const { id } = request.params;
-      const item = await objectionModels[modelName].query().findById(id);
-      reply.render(`${routePrefix}/edit`, { [modelName]: item });
-    })
-    .post(`/${routePrefix}`, { preValidation: app.authenticate }, async (request, reply) => {
-      const item = new objectionModels[modelName]();
-      item.$set(request.body.data);
+  // INDEX
+  app.get('/labels', { preValidation: app.authenticate }, async (request, reply) => {
+    const labels = await label.query();
+    return reply.render('labels/index', { labels });
+  });
 
-      try {
-        await objectionModels[modelName].query().insert(request.body.data);
-        request.flash('info', i18next.t('flash.labels.create.success'));
-        reply.redirect(`/${routePrefix}`);
-      } catch ({ data }) {
-        request.flash('error', i18next.t('flash.labels.create.error'));
-        reply.render(`${routePrefix}/new`, { [modelName]: item, errors: data });
-      }
-    })
-    .patch(`/${routePrefix}/:id`, { preValidation: app.authenticate }, async (request, reply) => {
-      const { id } = request.params;
-      const item = await objectionModels[modelName].query().findById(id);
-      try {
-        await item.$query().patch(request.body.data);
-        request.flash('info', i18next.t('flash.labels.update.success'));
-        reply.redirect(`/${routePrefix}`);
-      } catch ({ data }) {
-        request.flash('error', i18next.t('flash.labels.update.error'));
-        reply.render(`${routePrefix}/edit`, { [modelName]: item, errors: data });
-      }
-    })
-    .delete(`/${routePrefix}/:id`, { preValidation: app.authenticate }, async (request, reply) => {
-      const { id } = request.params;
-      const item = await objectionModels[modelName].query().findById(id);
-      try {
-        await item.$query().delete();
-        request.flash('info', i18next.t('flash.labels.delete.success'));
-        reply.redirect(`/${routePrefix}`);
-      } catch (error) {
-        console.error(error);
-        request.flash('error', i18next.t('flash.labels.delete.error'));
-        reply.redirect(`/${routePrefix}`);
-      }
-    });
+  // NEW
+  app.get('/labels/new', { preValidation: app.authenticate }, (request, reply) => {
+    const labelItem = new label();
+    return reply.render('labels/new', { label: labelItem });
+  });
+
+  // EDIT
+  app.get('/labels/:id/edit', { preValidation: app.authenticate }, async (request, reply) => {
+    const { id } = request.params;
+    const labelItem = await label.query().findById(id);
+    return reply.render('labels/edit', { label: labelItem });
+  });
+
+  // CREATE
+  app.post('/labels', { preValidation: app.authenticate }, async (request, reply) => {
+    const labelItem = new label();
+    labelItem.$set(request.body.data);
+
+    try {
+      await label.query().insert(request.body.data);
+
+      request.flash('info', i18next.t('flash.labels.create.success'));
+      return reply.redirect('/labels');
+    } catch (error) {
+      request.flash('error', i18next.t('flash.labels.create.error'));
+      return reply.render('labels/new', {
+        label: labelItem,
+        errors: error.data,
+      });
+    }
+  });
+
+  // UPDATE
+  app.patch('/labels/:id', { preValidation: app.authenticate }, async (request, reply) => {
+    const { id } = request.params;
+    const labelItem = await label.query().findById(id);
+
+    try {
+      await labelItem.$query().patch(request.body.data);
+
+      request.flash('info', i18next.t('flash.labels.update.success'));
+      return reply.redirect('/labels');
+    } catch (error) {
+      request.flash('error', i18next.t('flash.labels.update.error'));
+      return reply.render('labels/edit', {
+        label: labelItem,
+        errors: error.data,
+      });
+    }
+  });
+
+  // DELETE
+  app.delete('/labels/:id', { preValidation: app.authenticate }, async (request, reply) => {
+    const { id } = request.params;
+    const labelItem = await label.query().findById(id);
+
+    try {
+      await labelItem.$query().delete();
+
+      request.flash('info', i18next.t('flash.labels.delete.success'));
+      return reply.redirect('/labels');
+    } catch (error) {
+      request.flash('error', i18next.t('flash.labels.delete.error'));
+      return reply.redirect('/labels');
+    }
+  });
 };
