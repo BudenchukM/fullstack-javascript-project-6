@@ -1,35 +1,35 @@
 import i18next from 'i18next';
 
 export default (app) => {
-  const { status } = app.objection.models;
+  const { status: Status } = app.objection.models;
 
   // INDEX
   app.get('/statuses', { preValidation: app.authenticate }, async (request, reply) => {
-    const statuses = await status.query();
+    const statuses = await Status.query();
     return reply.render('statuses/index', { statuses });
   });
 
   // NEW
   app.get('/statuses/new', { preValidation: app.authenticate }, (request, reply) => {
-    const statusItem = new status();
+    const statusItem = new Status();
     return reply.render('statuses/new', { status: statusItem, errors: {} });
   });
 
   // EDIT
   app.get('/statuses/:id/edit', { preValidation: app.authenticate }, async (request, reply) => {
     const { id } = request.params;
-    const statusItem = await status.query().findById(id);
+    const statusItem = await Status.query().findById(id);
     return reply.render('statuses/edit', { status: statusItem, errors: {} });
   });
 
   // CREATE
   app.post('/statuses', { preValidation: app.authenticate }, async (request, reply) => {
-    const statusItem = new status();
+    const statusItem = new Status();
     statusItem.$set(request.body.data);
 
     try {
-      const validData = status.fromJson(request.body.data);
-      await status.query().insert(validData);
+      const validData = Status.fromJson(request.body.data);
+      await Status.query().insert(validData);
 
       request.flash('info', i18next.t('flash.statuses.create.success'));
       return reply.redirect('/statuses');
@@ -45,7 +45,7 @@ export default (app) => {
   // UPDATE
   app.patch('/statuses/:id', { preValidation: app.authenticate }, async (request, reply) => {
     const { id } = request.params;
-    const statusItem = await status.query().findById(id);
+    const statusItem = await Status.query().findById(id);
 
     try {
       await statusItem.$query().patch(request.body.data);
@@ -64,7 +64,7 @@ export default (app) => {
   // DELETE
   app.delete('/statuses/:id', { preValidation: app.authenticate }, async (request, reply) => {
     const { id } = request.params;
-    const statusItem = await status.query().findById(id);
+    const statusItem = await Status.query().findById(id);
 
     try {
       await statusItem.$query().delete();
