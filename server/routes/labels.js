@@ -1,67 +1,60 @@
+import i18next from 'i18next';
+
 export default (app) => {
-  const Label = app.objection.models.label;
+  const objectionModels = app.objection.models;
+  const modelName = 'label';
+  const routePrefix = 'labels';
 
   app
-    .get('/labels', { preValidation: app.authenticate }, async (request, reply) => {
-      const labels = await Label.query();
-      reply.render('labels/index', { labels });
-      return reply;
+    .get(`/${routePrefix}`, { preValidation: app.authenticate }, async (request, reply) => {
+      const items = await objectionModels[modelName].query();
+      reply.render(`${routePrefix}/index`, { [routePrefix]: items });
     })
-    .get('/labels/new', { preValidation: app.authenticate }, (request, reply) => {
-      const label = new Label();
-      reply.render('labels/new', { label });
-      return reply;
+    .get(`/${routePrefix}/new`, { preValidation: app.authenticate }, (request, reply) => {
+      const item = new objectionModels[modelName]();
+      reply.render(`${routePrefix}/new`, { [modelName]: item });
     })
-    .get('/labels/:id/edit', { preValidation: app.authenticate }, async (request, reply) => {
+    .get(`/${routePrefix}/:id/edit`, { preValidation: app.authenticate }, async (request, reply) => {
       const { id } = request.params;
-      const label = await Label.query().findById(id);
-      reply.render('labels/edit', { label });
-      return reply;
+      const item = await objectionModels[modelName].query().findById(id);
+      reply.render(`${routePrefix}/edit`, { [modelName]: item });
     })
-    .post('/labels', { preValidation: app.authenticate }, async (request, reply) => {
-      const label = new Label();
-      label.$set(request.body.data);
+    .post(`/${routePrefix}`, { preValidation: app.authenticate }, async (request, reply) => {
+      const item = new objectionModels[modelName]();
+      item.$set(request.body.data);
 
       try {
-        await label.$query().insert();
-        request.flash('info', request.t('flash.labels.create.success'));
-        reply.redirect('/labels');
+        await objectionModels[modelName].query().insert(request.body.data);
+        request.flash('info', i18next.t('flash.labels.create.success'));
+        reply.redirect(`/${routePrefix}`);
       } catch ({ data }) {
-        request.flash('error', request.t('flash.labels.create.error'));
-        reply.render('labels/new', { label, errors: data });
+        request.flash('error', i18next.t('flash.labels.create.error'));
+        reply.render(`${routePrefix}/new`, { [modelName]: item, errors: data });
       }
-      return reply;
     })
-    .patch('/labels/:id', { preValidation: app.authenticate }, async (request, reply) => {
+    .patch(`/${routePrefix}/:id`, { preValidation: app.authenticate }, async (request, reply) => {
       const { id } = request.params;
-      const label = await Label.query().findById(id);
-      const { data } = request.body;
-
+      const item = await objectionModels[modelName].query().findById(id);
       try {
-        label.$set(data);
-        await label.$query().patch(data);
-        request.flash('info', request.t('flash.labels.update.success'));
-        reply.redirect('/labels');
-      } catch (errors) {
-        request.flash('error', request.t('flash.labels.update.error'));
-        const errorData = errors.data || errors;
-        reply.render('labels/edit', { label, errors: errorData });
+        await item.$query().patch(request.body.data);
+        request.flash('info', i18next.t('flash.labels.update.success'));
+        reply.redirect(`/${routePrefix}`);
+      } catch ({ data }) {
+        request.flash('error', i18next.t('flash.labels.update.error'));
+        reply.render(`${routePrefix}/edit`, { [modelName]: item, errors: data });
       }
-      return reply;
     })
-    .delete('/labels/:id', { preValidation: app.authenticate }, async (request, reply) => {
+    .delete(`/${routePrefix}/:id`, { preValidation: app.authenticate }, async (request, reply) => {
       const { id } = request.params;
-      const label = await Label.query().findById(id);
-
+      const item = await objectionModels[modelName].query().findById(id);
       try {
-        await label.$query().delete();
-        request.flash('info', request.t('flash.labels.delete.success'));
-        reply.redirect('/labels');
+        await item.$query().delete();
+        request.flash('info', i18next.t('flash.labels.delete.success'));
+        reply.redirect(`/${routePrefix}`);
       } catch (error) {
         console.error(error);
-        request.flash('error', request.t('flash.labels.delete.error'));
-        reply.redirect('/labels');
+        request.flash('error', i18next.t('flash.labels.delete.error'));
+        reply.redirect(`/${routePrefix}`);
       }
-      return reply;
     });
 };
