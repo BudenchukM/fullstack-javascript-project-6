@@ -6,11 +6,8 @@ config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Единый путь для ВСЕХ окружений:
 const migrations = {
-  directory: path.join(__dirname, 'server', 'migrations'),
-};
-
-const productionMigrations = {
   directory: path.join(__dirname, 'database', 'migrations'),
 };
 
@@ -23,15 +20,14 @@ export const development = {
     afterCreate: (conn, cb) => conn.run('PRAGMA foreign_keys = ON', cb),
   },
   useNullAsDefault: true,
-  migrations,
+  migrations, // ← теперь одинаковый путь
 };
 
 export const test = {
   client: 'sqlite3',
   connection: ':memory:',
   useNullAsDefault: true,
-  // debug: true,
-  migrations,
+  migrations, // ← одинаковый путь
 };
 
 export const production = {
@@ -39,10 +35,9 @@ export const production = {
   connection: {
     connectionString: process.env.DATABASE_URL,
     ssl: {
-      rejectUnauthorized: false, // только для тестирования на Render
+      rejectUnauthorized: false,
     },
   },
   useNullAsDefault: true,
-  // debug: true,
-  migrations: productionMigrations,
+  migrations, // ← одинаковый путь
 };
