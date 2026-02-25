@@ -11,21 +11,21 @@ export default (app) => {
 
   // NEW
   app.get('/statuses/new', { preValidation: app.authenticate }, (request, reply) => {
-    const taskStatus = new status();
-    return reply.render('statuses/new', { taskStatus });
+    const statusItem = new status();
+    return reply.render('statuses/new', { status: statusItem, errors: {} });
   });
 
   // EDIT
   app.get('/statuses/:id/edit', { preValidation: app.authenticate }, async (request, reply) => {
     const { id } = request.params;
-    const taskStatus = await status.query().findById(id);
-    return reply.render('statuses/edit', { taskStatus });
+    const statusItem = await status.query().findById(id);
+    return reply.render('statuses/edit', { status: statusItem, errors: {} });
   });
 
   // CREATE
   app.post('/statuses', { preValidation: app.authenticate }, async (request, reply) => {
-    const taskStatus = new status();
-    taskStatus.$set(request.body.data);
+    const statusItem = new status();
+    statusItem.$set(request.body.data);
 
     try {
       const validData = status.fromJson(request.body.data);
@@ -36,8 +36,8 @@ export default (app) => {
     } catch (error) {
       request.flash('error', i18next.t('flash.statuses.create.error'));
       return reply.render('statuses/new', {
-        taskStatus,
-        errors: error.data,
+        status: statusItem,
+        errors: error.data || {},
       });
     }
   });
@@ -45,18 +45,18 @@ export default (app) => {
   // UPDATE
   app.patch('/statuses/:id', { preValidation: app.authenticate }, async (request, reply) => {
     const { id } = request.params;
-    const taskStatus = await status.query().findById(id);
+    const statusItem = await status.query().findById(id);
 
     try {
-      await taskStatus.$query().patch(request.body.data);
+      await statusItem.$query().patch(request.body.data);
 
       request.flash('info', i18next.t('flash.statuses.update.success'));
       return reply.redirect('/statuses');
     } catch (error) {
       request.flash('error', i18next.t('flash.statuses.update.error'));
       return reply.render('statuses/edit', {
-        taskStatus,
-        errors: error.data,
+        status: statusItem,
+        errors: error.data || {},
       });
     }
   });
@@ -64,10 +64,10 @@ export default (app) => {
   // DELETE
   app.delete('/statuses/:id', { preValidation: app.authenticate }, async (request, reply) => {
     const { id } = request.params;
-    const taskStatus = await status.query().findById(id);
+    const statusItem = await status.query().findById(id);
 
     try {
-      await taskStatus.$query().delete();
+      await statusItem.$query().delete();
 
       request.flash('info', i18next.t('flash.statuses.delete.success'));
       return reply.redirect('/statuses');
