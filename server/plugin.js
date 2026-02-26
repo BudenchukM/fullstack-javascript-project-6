@@ -14,9 +14,9 @@ import fastifyObjectionjs from 'fastify-objectionjs';
 import qs from 'qs';
 import Pug from 'pug';
 import i18next from 'i18next';
+import Backend from 'i18next-fs-backend';
 import Rollbar from 'rollbar';
 
-import ru from './locales/ru.js';
 import addRoutes from './routes/index.js';
 import getHelpers from './helpers/index.js';
 import * as knexConfig from '../knexfile.js';
@@ -54,11 +54,15 @@ const setUpStaticAssets = (app) => {
 };
 
 const setupLocalization = async () => {
-  await i18next.init({
-    lng: 'ru',
-    fallbackLng: 'ru',
-    resources: { ru },
-  });
+  await i18next
+    .use(Backend)
+    .init({
+      lng: 'ru',
+      fallbackLng: 'ru',
+      backend: {
+        loadPath: path.join(__dirname, '..', 'locales', '{{lng}}', 'translation.json'),
+      },
+    });
 };
 
 const addHooks = (app) => {
